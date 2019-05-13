@@ -10,8 +10,58 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
+library(lubridate)
 
 nobel_winners <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-14/nobel_winners.csv")
 nobel_winner_all_pubs <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-05-14/nobel_winner_all_pubs.csv")
+
+
+
+glimpse(nobel_winners)
+nobel_winners %>% count(organization_name, sort=T)
+
+```
+
+
+#question: are nobel prize winners born in a certain month? or a certain day?
+
+
+```{r}
+nobel_winners %>% mutate(month_born =month(birth_date,label=T)) %>% count(month_born, sort = T)
+
+nobel_winners %>% mutate(month_born =month(birth_date,label=T)) %>% ggplot(aes(month_born)) +
+  geom_histogram(stat="count") 
+
+#nice
+nobel_winners %>% count(   month_born =month(birth_date,label=T)   ) %>%
+  filter(!is.na(month_born)) %>% 
+  ggplot(aes(month_born,n)) + geom_line(group=1, size=3, color="blue") + labs(x = "birth month",y = "", title= "Month that Nobel Prize Winners were born (1901-2016)", subtitle ="from TidyTuesday" ) 
+
+
+#+ geom_text(aes(label = n), vjust = -4, hjust = 2, check_overlap = TRUE) 
+
+
+nobel_winners %>% count(calendar_day = day(birth_date)) %>%
+  filter(!is.na(calendar_day)) %>% 
+  ggplot(aes(calendar_day,n)) + geom_line(group=1, size=3, color="blue") + labs(x = "birth month",y = "", title= "calendar  day that Nobel Prize Winners were born (1901-2016)", subtitle ="from TidyTuesday" ) 
+
+
+
+
+
+nobel_winners %>% count(weekday_born = wday(birth_date, label=T))  %>% filter(!is.na(weekday_born)) %>%  ggplot(aes(x= weekday_born, y = n)) + geom_line(group=1, size=3, color="blue") + labs(x = "day",y = "", title= "day of the week that Nobel Prize Winners were born (1901-2016)", subtitle ="from TidyTuesday" ) 
+
+
+
+```
+
+but to be fair can see a simialr random pattern for death date?a
+
+
+
+#look at other set
+
+```{r}
+nobel_winner_all_pubs %>% count(category)
 ```
 
