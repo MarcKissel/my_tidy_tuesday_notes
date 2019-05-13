@@ -55,9 +55,10 @@ nobel_winners %>% count(weekday_born = wday(birth_date, label=T))  %>% filter(!i
 
 ```
 
-but to be fair can see a simialr random pattern for death date?abcd
+<<<<<<< HEAD
+but to be fair can see a simialr random pattern for death date?
 
-
+UPDATED
 
 #look at other set
 
