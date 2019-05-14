@@ -38,6 +38,11 @@ nobel_winners %>% count(   month_born =month(birth_date,label=T)   ) %>%
   ggplot(aes(month_born,n)) + geom_line(group=1, size=3, color="blue") + labs(x = "birth month",y = "", title= "Month that Nobel Prize Winners were born (1901-2016)", subtitle ="from TidyTuesday" ) 
 
 
+nobel_winners %>% count(   month_die =month(death_date,label=T)   ) %>%
+  filter(!is.na(month_die)) %>% 
+  ggplot(aes(month_die,n)) + geom_line(group=1, size=3, color="blue") + labs(x = "month",y = "", title= "Month that Nobel Prize Winners died (1901-2016)", subtitle ="from TidyTuesday" ) 
+
+
 #+ geom_text(aes(label = n), vjust = -4, hjust = 2, check_overlap = TRUE) 
 
 
@@ -53,6 +58,7 @@ nobel_winners %>% count(weekday_born = wday(birth_date, label=T))  %>% filter(!i
 
 
 
+
 ```
 
 <<<<<<< HEAD
@@ -60,9 +66,51 @@ but to be fair can see a simialr random pattern for death date?
 
 UPDATED
 
+#look at ages
+how can we get age. might be over or under age by a year
+
+```{r}
+nobel_winners %>% mutate( age =  prize_year - year(birth_date)) %>% count(age, sort=T) %>% filter(!is.na(age)) %>%  ggplot(aes(age,n)) + geom_line(size=2, color="blue")
+
+
+nobel_winners %>% mutate( age =  prize_year - year(birth_date)) %>% filter(age == 17)
+
+
+nobel_winners %>% mutate( age =  prize_year - year(birth_date)) %>% group_by(gender) %>% filter(!is.na(gender)) %>% 
+ggplot(aes(x=gender, y= age)) + geom_boxplot() + coord_flip()
+```
+
+
+
 #look at other set
 
 ```{r}
 nobel_winner_all_pubs %>% count(category)
+```
+
+#does the lenht o the title tell us something abot nobel chance
+
+```{r}
+str_length()
+nobel_winner_all_pubs %>% filter(laureate_id == 20001) %>% mutate(size = str_length(title))
+
+
+nobel_winner_all_pubs  %>% mutate(size = str_length(title)) %>% View()
+
+nobel_winner_all_pubs  %>% mutate(size = str_length(title)) %>% ggplot(aes( x = is_prize_winning_paper, y= size)) + geom_boxplot() + coord_flip() + labs(x = "did paper win prize", y = "", title = "length of a paper and if it won Nobel compared to other paper by winning authors")
+  
+
+#how many pps do winning folks tend to write?
+
+nobel_winner_all_pubs %>% group_by(laureate_id) %>% tally() %>% View()
+
+ nobel_winner_all_pubs %>% group_by(laureate_id) %>% count(total_paper = count(title))
+
+
+nobel_winner_all_pubs %>% filter(laureate_id == 20056) %>% View()
+
+nobel_winner_all_pubs %>% group_by(laureate_id) %>% count(laureate_name)  %>% 
+  ggplot(aes(y=laureate_name ,x=n)) + geom_boxplot()
+
 ```
 
