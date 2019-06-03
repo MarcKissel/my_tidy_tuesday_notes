@@ -1,0 +1,52 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(WDI)
+library(mapdata)
+ramen <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-04/ramen_ratings.csv")
+
+glimpse(ramen)
+ramen %>% count(country,style, sort=T) %>% View()
+
+```
+
+
+```{r}
+library(ggthemes)
+glimpse(map_data("world"))
+
+
+ramen <- ramen %>% group_by(country) %>% mutate(median_stars = median(stars, na.rm =T))
+
+
+ramen_map <- map_data("world") %>% 
+  filter(region != "Antarctica") %>% 
+  left_join(ramen, by = c("region" = "country"))
+
+
+
+
+
+ramen_map  %>%  ggplot(aes(long, lat, group=group, fill = median_stars)) + geom_polygon() +theme_map() + coord_fixed(2) + scale_fill_gradient2(low = "blue", mid = "pink", high="red", midpoint = 3.7)
+
+```
+
+how do dif countries compare
+```{r}
+library(countrycode)
+codelist_small <- codelist %>% select(country.name.en, continent, region)
+ramen_2 <- ramen_map %>% left_join(codelist_small, by = c("region" = "country.name.en"))
+ramen_3 <- ramen_2 %>% left_join(indicators, by = c("region" = "country")   )
+
+indicators<- WDI(indicator = "NY.GDP.PCAP.CD",
+                      start = 2016, end = 2016, extra = TRUE) %>%
+  tbl_df() %>%
+  select(country,
+         income,
+         gdp_per_capita = NY.GDP.PCAP.CD)
+```
+
