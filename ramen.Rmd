@@ -50,3 +50,17 @@ indicators<- WDI(indicator = "NY.GDP.PCAP.CD",
          gdp_per_capita = NY.GDP.PCAP.CD)
 ```
 
+#from drob
+
+```{r}
+ramen %>% gather(category, value, -review_number, -stars) 
+```
+
+using extract to break apart strings
+```{r}
+library(broom)
+lm(stars ~ brand + country + style, data = ramen) %>%
+  tidy(conf.int = TRUE) %>% 
+extract(term, c("cat", "term"), "^([a-z]+[A-Z].*)")
+```
+

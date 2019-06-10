@@ -1,0 +1,119 @@
+---
+title: "priamte"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+body_mass <- read_csv("https://zenodo.org/record/2600338/files/BodyMass.csv")
+
+diel_activity <- read_csv("https://zenodo.org/record/2600338/files/DielActivity.csv")
+
+habitat <- read_csv("https://zenodo.org/record/2600338/files/Habitat.csv")
+
+
+home_range <- read_csv("https://zenodo.org/record/2600338/files/HomeRange.csv")
+
+
+IUCN_Poptrend_Realm <-read_csv("https://zenodo.org/record/2600338/files/IUCN_Poptrend_Realm.csv")
+
+Locomotion <- read_csv("https://zenodo.org/record/2600338/files/Locomotion.csv")
+
+
+TrophicGuild <- read_csv("https://zenodo.org/record/2600338/files/TrophicGuild.csv")
+```
+
+
+
+
+play
+
+```{r}
+glimpse(home_range)
+home_range %>% count(Family)
+home_range %>% ggplot(aes(x=Family, y =HomeRange_ha)) + geom_boxplot() + coord_flip()
+#cerco has one with really high home range
+
+home_range %>% ggplot(aes(x=Family, y =HomeRange_ha)) + geom_boxplot() + coord_flip() + scale_y_log10(labels = scales::comma)
+
+
+home_range %>% ggplot(aes(x=Family, y =HomeRange_ha, fill=Family)) + geom_boxplot() + coord_flip() + scale_y_log10(labels = scales::comma)
+
+
+
+
+home_range  %>% 
+  filter(!is.na(Family)) %>% 
+  ggplot(aes(x=fct_reorder(Family, HomeRange_ha), y =HomeRange_ha, fill=Family)) + geom_boxplot() + coord_flip() + scale_y_log10(labels = scales::comma)
+
+#### hjust filter out the lager homerange
+
+home_range %>% mutate(Family = fct_reorder(Family, HomeRange_ha,.fun = mean)) %>% 
+  filter(!is.na(Family),
+         HomeRange_ha < 200) %>% 
+  ggplot(aes(x= Family, y =HomeRange_ha, fill=Family)) + geom_boxplot() + coord_flip() 
+
+
+home_range %>% filter(HomeRange_ha > 15000) %>% View()
+
+home_range %>% filter(HomeRange_ha < 4000) %>% ggplot(aes(x=fct_reorder(Family, HomeRange_ha), y =HomeRange_ha)) +  geom_boxplot() + coord_flip()
+
+
+home_range %>% filter(HomeRange_ha < 4000) %>% ggplot(aes(x=fct_reorder(Genus,HomeRange_ha), y =HomeRange_ha, color = Family)) +  geom_boxplot() + coord_flip()
+
+
+home_range %>% filter(HomeRange_ha < 500) %>%  filter(Family != "Hominidae" & Family != "Cercopithecidae")%>% ggplot(aes(x=fct_reorder(Family, HomeRange_ha), y =HomeRange_ha, fill=Family)) +  geom_boxplot() + coord_flip()
+
+home_range %>% filter(HomeRange_ha < 500) %>%  filter(Family != "Hominidae" & Family != "Cercopithecidae")%>% ggplot(aes(x=fct_reorder(Family, HomeRange_ha), y =HomeRange_ha, fill=Family)) +  geom_boxplot() + coord_flip() + scale_y_log10()
+
+#this works
+
+home_range %>% filter(HomeRange_ha < 1000000)%>% filter(!is.na(Family)) %>%  ggplot(aes(x=fct_reorder(Family, HomeRange_ha), y =HomeRange_ha, fill=Family)) +  geom_boxplot() + coord_flip() + scale_y_log10()
+
+
+```
+
+
+```{r}
+body_mass %>% ggplot(aes(x=Family, y =BodyMass_kg)) + geom_boxplot() + coord_flip()
+#Cheirogaleidae has way to high body mass
+
+body_mass  %>%  filter(Family != "Hominidae" & Family != "Cheirogaleidae") %>% ggplot(aes(x=Family, y =BodyMass_kg)) + geom_boxplot() + coord_flip()
+
+body_mass  %>%  filter(Family != "Hominidae" & Family != "Cheirogaleidae") %>% ggplot(aes(x=Family, y =BodyMass_kg)) + geom_boxplot() + coord_flip() + scale_y_log10(labels = scales::comma)
+
+body_mass  %>%  filter(Family != "Cheirogaleidae") %>% ggplot(aes(x= BodyMassMale_kg, y = BodyMassFemale_kg, color = Family, label = CommonName)) + scale_x_log10() + scale_y_log10() + geom_point() + geom_text(check_overlap = T)
+
+p <- body_mass  %>%  filter(Family != "Cheirogaleidae") %>% ggplot(aes(x= BodyMassMale_kg, y = BodyMassFemale_kg, color = Family, label = CommonName)) + scale_x_log10() + scale_y_log10() + geom_point()
+
+library(plotly)
+ggplotly(p)
+```
+
+
+```{r}
+TrophicGuild %>% count(Country)
+countrycode::codelist %>% view()
+install.packages("rnaturalearth")
+install.packages("rnaturalearthdata")
+install.packages("rgeos")
+library(rgeos)
+library("rnaturalearth")
+library("rnaturalearthdata")
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+#isoa3
+
+glimpse(world)
+
+library(countrycode)
+temp <- codelist %>% select(country.name.en, iso3c, continent, region)
+join <- TrophicGuild %>% left_join(temp, by= c( "Country" = "country.name.en"))
+join_2 <- join %>% left_join(world, by = c("Country" = "iso_a3"))
+
+
+```
+
+
+
+
