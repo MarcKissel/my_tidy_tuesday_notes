@@ -34,8 +34,61 @@ library(maps)
 meteorites$Country <- map.where(database="world", y= as.integer(meteorites$long), x= as.integer( meteorites$lat))
 
 
-map.where("state", -73.8, 41)
+map.where("world", 69.1, 172.6)
+
 ```
+above doesn;t seem to work for most of the data i have
+
+```{r}
+install.packages("revgeo")
+library('revgeo')
+revgeo(longitude=-86.46222, latitude=33.94954, provider=NULL, API=NULL, output='hash', item='country')
+
+
+revgeo(longitude=69.1, latitude=172.6, provider=NULL, API=NULL, output='hash', item='country')
+
+met1 <- meteorites[1:50,]
+
+cities <- revgeo(met1$long, met1$lat, provider =  'photon', output = 'frame')
+
+location <- revgeo(meteorites$long, meteorites$lat, provider =  'photon', output = 'frame')
+
+#maybe i should have filtered out the NAs!!!!!
+
+
+meteorites_filtered <- meteorites %>% filter(!is.na(lat))
+#still really big, maybe just fell! (ie seen)
+
+fell <- meteorites_filtered %>% filter(fall == "Fell")
+
+location <- revgeo(fell$long, fell$lat, provider =  'photon', output = 'frame')
+
+write.csv(location, "tmp.csv")
+write.csv(my, "tmp.csv")
+my_data <- fell %>% cbind(location)
+my_data %>% count(country, sort=T)
+
+write.csv(my_data, "joined.csv")
+```
+
+
+maps
+
+```{r}
+meteorites_filtered %>% ggplot(aes(long, lat)) + geom_point()
+
+#try
+
+meteorites_filtered %>% ggplot(aes(long, lat)) + borders("world") + geom_point()
+
+my_data %>% ggplot(aes(long, lat, color=country)) + borders("world") + geom_point() + theme(legend.position = "none")
+
+
+my_data %>% filter(country != "Country Not Found" )%>% ggplot(aes(long, lat, color=country)) + borders("world") + geom_point() + theme(legend.position = "none")
+```
+
+
+
 
 
 
