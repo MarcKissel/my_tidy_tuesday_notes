@@ -70,7 +70,10 @@ home_range %>% filter(HomeRange_ha < 500) %>%  filter(Family != "Hominidae" & Fa
 
 home_range %>% filter(HomeRange_ha < 1000000)%>% filter(!is.na(Family)) %>%  ggplot(aes(x=fct_reorder(Family, HomeRange_ha), y =HomeRange_ha, fill=Family)) +  geom_boxplot() + coord_flip() + scale_y_log10()
 
+home_range %>% filter(HomeRange_ha < 1000000)%>% filter(!is.na(Family)) %>%  ggplot(aes(y=fct_reorder(Family, HomeRange_ha), x =HomeRange_ha, fill=Family)) +  geom_density_ridges_gradient()  + scale_x_log10() + labs(title = "home range for primate Famlies", y="")
 
+
+home_range %>% filter(HomeRange_ha > 1000000)
 ```
 
 

@@ -72,6 +72,14 @@ write.csv(my_data, "joined.csv")
 ```
 
 
+
+
+```{r}
+my_data <- read_
+
+
+```
+
 maps
 
 ```{r}
@@ -85,6 +93,20 @@ my_data %>% ggplot(aes(long, lat, color=country)) + borders("world") + geom_poin
 
 
 my_data %>% filter(country != "Country Not Found" )%>% ggplot(aes(long, lat, color=country)) + borders("world") + geom_point() + theme(legend.position = "none")
+
+library(gganimate)
+
+my_data %>%  ggplot(aes(long, lat, color=country)) + borders("world") + geom_point() + theme(legend.position = "none") +
+transition_states(year, 
+                          transition_length = 1, 
+                          state_length = 1) + shadow_mark(past=TRUE) +  labs(title = "{closest_state}")
+
+
+my_data %>% count(year) %>% View()
+
+library(ggridges)
+
+my_data %>% mutate(class = fct_lump(class, 7) ) %>%  ggplot(aes(x= mass, y = class)) + geom_density_ridges() + scale_x_log10(label = scales::comma)
 ```
 
 

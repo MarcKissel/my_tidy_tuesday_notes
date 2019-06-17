@@ -1,0 +1,33 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+
+bird<- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-18/bird_counts.csv") %>% separate(species_latin, c("genus_latin", "species_latin"))
+
+View(bird)
+bird %>% count(species_latin) %>% View()
+# use stringr  to seperate latin names
+
+bird %>% count(genus_latin,sort=T)
+bird %>% count(species_latin, sort =T)
+```
+
+
+```{r}
+
+bird %>% ggplot(aes(how_many_counted_by_hour)) + geom_histogram() + scale_x_log10(labels= scales::comma)
+bird %>% ggplot(aes(x = fct_lump(genus_latin,7) , y=how_many_counted_by_hour)) + geom_boxplot()
+
+bird %>% mutate(genus_latin = fct_lump(genus_latin,7)) %>% 
+  ggplot(aes(x = fct_reorder(genus_latin, how_many_counted_by_hour) , y=how_many_counted_by_hour)) + geom_boxplot() + coord_flip() + scale_y_log10(labels= scales::comma)
+
+```
+
