@@ -1,0 +1,194 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+ufo_raw <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-25/ufo_sightings.csv")
+
+ufo <- ufo_raw %>% mutate(
+  date_time = mdy_hm(date_time),
+  year = year(date_time),
+  month = month(date_time, label = T),
+  day= wday(date_time, label =T),
+  hour = hour(date_time)) 
+
+ufo %>% count(ufo_shape, sort =T)
+ufo %>% count(country , sort=T)
+ufo %>% count(encounter_length , sort=T)
+
+
+ufo %>% mutate(year = year(date_time)) %>% count(year, sort=T) %>% ggplot(aes(x=year, y=n())) + geom_line()
+
+ufo %>%  group_by(year) %>% summarise(total_count = n()) %>% ggplot(aes(x=year, y = total_count)) + geom_line()
+
+
+ufo %>% group_by(year, country) %>% summarise(total_count = n()) %>% View()
+
+ufo %>%  group_by(year, country) %>% summarise(total_count = n()) %>% ggplot(aes(x=year, y = total_count, color=country)) + geom_line(size=1)
+#ok, but not much stuff bfore 1950
+
+ufo %>%  filter(year>1990) %>%   group_by(year, country) %>% summarise(total_count = n()) %>% ggplot(aes(x=year, y = total_count, color=country)) + geom_line(size=1)
+
+
+
+
+#how about by month 
+
+ufo  %>%   group_by(month) %>% summarise(total_count = n()) %>% ggplot(aes(x=month, y = total_count)) + geom_line(size=1, group=1)
+
+
+
+ufo  %>%   group_by(month, country) %>% summarise(total_count = n()) %>% ggplot(aes(x=month, y = total_count, group=country, color=country)) + geom_line(size=1)
+
+
+ufo  %>%   group_by(month, country) %>% summarise(total_count = n()) %>% filter(country != "us") %>%  ggplot(aes(x=month, y = total_count, group=country, color=country)) + geom_line(size=1)
+
+
+#by day
+
+ufo  %>%   group_by(day, country) %>% summarise(total_count = n()) %>% ggplot(aes(x=day, y = total_count, group=country, color=country)) + geom_line(size=1)
+
+
+#hour
+ufo %>% count(hour, sort=T)
+
+
+
+ufo  %>%   group_by(hour, country) %>% summarise(total_count = n()) %>% ggplot(aes(x=hour, y = total_count, group=country, color=country)) + geom_line(size=1)
+
+ufo  %>%   group_by(hour) %>% summarise(total_count = n()) %>% ggplot(aes(x=hour, y = total_count)) + geom_line(size=1)
+```
+
+
+map
+
+```{r}
+ufo %>% ggplot(aes(x=longitude, y= latitude)) + geom_point() 
+
+ufo %>% ggplot(aes(x=longitude, y= latitude, color=country)) + geom_point() + borders(database="world")
+
+ufo %>% ggplot(aes(x=longitude, y= latitude, color=country)) + geom_point() + borders(database="world") + coord_cartesian() + 
+
+
+library(gganimate)
+
+#ufo %>% ggplot(aes(x=longitude, y= latitude, #color=country)) + geom_point() + #borders(database="world") + transition_time(year)
+```
+
+try to get countries?
+```{r}
+library(revgeo)
+ufo_sub <- ufo %>% filter(year>2000)
+location <- revgeo(ufo_sub$longitude, ufo_sub$latitude, provider =  'photon', output = 'frame')
+```
+
+
+try text
+
+```{r}
+library(tidytext)
+
+text_ufo <- ufo %>% select(date_time, description) %>% unnest_tokens(word,description ) %>% anti_join(stop_words) %>% filter(str_detect(word, "[a-z]")) 
+
+text_ufo %>% anti_join(stop_words) %>% count(word, sort=T)
+
+text_ufo %>%  count(word, sort=T)  %>% head(30) %>%  mutate(word = fct_reorder(word, n)) %>% ggplot(aes(x=word, y=n)) + geom_col()+ coord_flip() + labs(title = "top 30 words used in descriptions of UFOs")
+
+text_ufo %>%  count(word, sort=T)  %>% head(25) %>%  mutate(word = fct_reorder(word, n)) %>% ggplot(aes(x=word, y=n, fill=word)) + geom_col()+ coord_flip() + labs(title = "top 25 words used in descriptions of UFOs") + theme(legend.position = "none")
+
+
+library(cowplot)
+library(magick)
+
+ufo_plot <- text_ufo %>%  count(word, sort=T)  %>% head(25) %>%  mutate(word = fct_reorder(word, n)) %>% ggplot(aes(x=word, y=n, fill=word)) + geom_col()+ coord_flip() + labs(title = "top 25 words used in descriptions of UFOs") + theme(legend.position = "none")
+
+ufo_plot
+
+ggdraw() +
+  draw_image("https://images-na.ssl-images-amazon.com/images/I/91VoYZMDoiL._SX425_.jpg") +
+  draw_plot(ufo_plot)
+#doesnt really work try someting sese
+
+library(grid) #for rasterGrob
+shark_background <- png::readPNG("shark_background.png")
+
+truth_background <- png::readPNG("truth.png")
+believe_background <- png::readPNG("believe.png")
+
+
+
+text_ufo %>%  count(word, sort=T)  %>% head(25) %>%  mutate(word = fct_reorder(word, n)) %>% ggplot(aes(x=word, y=n, fill=word)) + geom_col()+ coord_flip() + labs(title = "top 25 words used in descriptions of UFOs") + theme(legend.position = "none") + annotation_custom(rasterGrob(shark_background, 
+                                 width = unit(1,"npc"), 
+                                 height = unit(1,"npc")), 
+                      -Inf, Inf, -Inf, Inf)
+
+#close but need to build it differnrlt
+
+
+text_ufo %>%  count(word, sort=T)  %>% head(25) %>%  mutate(word = fct_reorder(word, n)) %>% ggplot(aes(x=word, y=n, fill=word)) + annotation_custom(rasterGrob(truth_background, 
+                                 width = unit(1,"npc"), 
+                                 height = unit(1,"npc")), 
+                      -Inf, Inf, -Inf, Inf) +
+
+  geom_col()+ coord_flip() + labs(title = "top 25 words used in descriptions of UFOs") + theme(legend.position = "none") 
+
+#so close but can't see
+
+
+#version 1
+text_ufo %>%  count(word, sort=T)  %>% head(25) %>%  mutate(word = fct_reorder(word, n)) %>% ggplot(aes(x=word, y=n, fill=word, alpha=.5)) + annotation_custom(rasterGrob(truth_background, 
+                                 width = unit(1,"npc"), 
+                                 height = unit(1,"npc")), 
+                      -Inf, Inf, -Inf, Inf) +
+
+  geom_col()+ coord_flip() + labs(title = "top 25 words used in descriptions of UFOs") + theme(legend.position = "none") 
+
+
+#version2
+
+text_ufo %>%  count(word, sort=T)  %>% head(25) %>%  mutate(word = fct_reorder(word, n)) %>% ggplot(aes(x=word, y=n, fill=word, alpha=.5)) + annotation_custom(rasterGrob(believe_background, 
+                                 width = unit(1,"npc"), 
+                                 height = unit(1,"npc")), 
+                      -Inf, Inf, -Inf, Inf) +
+
+  geom_col()+ coord_flip() + labs(title = "top 25 words used in descriptions of UFOs") + theme(legend.position = "none") 
+
+
+
+
+
+logo_raw <- image_read("http://hexb.in/hexagons/ggplot2.png") 
+
+logo <- logo_raw %>%
+  image_scale("100") %>% 
+  image_background("grey", flatten = TRUE) %>%
+  image_border("grey", "600x10") %>%
+  image_annotate("Powered By R", color = "white", size = 30, 
+                 location = "+10+50", gravity = "northeast")
+
+final_plot <- image_append(image_scale(c(plot, logo), "500"), stack = TRUE)
+
+```
+
+
+
+```{r}
+library(widyr)
+UFO_words_filtered <- text_ufo %>%
+  distinct(date_time, word) %>%
+  add_count(word) %>%
+  filter(n >= 300)
+
+UFO_words_filtered %>% pairwise_cor(word, date_time, sort=TRUE)
+  
+UFO_words_filtered %>%
+  pairwise_cor(word, date_time, sort = TRUE)
+```
+

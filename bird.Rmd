@@ -68,3 +68,9 @@ grepl
  bird %>%
 +     mutate(type=ifelse(grepl('Owl', species), 'Owl', ifelse(grepl('Duck', species), "Duck", 'Other Species')),
 +            count_k=how_many_counted/1000)
+
+
+```{r}
+bird2 <- bird %>% mutate(new = ifelse(grepl('Sparrow', species), 'Sparrow', ifelse(grepl('Warbler', species), 'Warbler', 'other')))
+```
+Warbler
