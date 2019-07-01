@@ -1,0 +1,41 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+
+media <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-02/media_franchises.csv")
+```
+
+
+```{r}
+media
+
+media  %>% group_by(franchise) %>% summarise(avg = mean(revenue)) %>% arrange(desc(avg)) 
+
+media  %>% group_by(franchise) %>% mutate(avg = mean(revenue)) %>% ungroup()  %>%  ggplot(aes(avg)) + geom_histogram(binwidth = .5)
+
+media  %>% group_by(franchise) %>% mutate(avg = mean(revenue)) %>% ungroup() %>%  ggplot(aes(x=avg, y= original_media)) + geom_point()
+
+
+media %>% group_by(original_media) %>% summarise(avg = mean(revenue)) %>% arrange(desc(avg))
+
+media %>% group_by(revenue_category) %>% summarise(avg = mean(revenue)) %>% arrange(desc(avg))
+
+media %>% group_by(year_created) %>% summarise(avg_rev = mean(revenue)) %>% arrange(desc(avg_rev)) 
+
+
+media %>% group_by(year_created) %>% mutate(avg_rev = mean(revenue)) %>% ungroup() %>% ggplot(aes(x=year_created, y = avg_rev)) + geom_line() 
+
+
+
+```
+ 
+ look at rev catagory over time
+
