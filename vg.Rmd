@@ -1,0 +1,51 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+
+video_games_raw <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv")
+
+video_games_raw %>% mutate(release_date = mdy(release_date)) %>% filter(is.na(release_date)) %>% View()
+
+video_games_raw %>% filter(number == 484) %>% View()
+#note that Hazard Ops is wrong format
+
+vg <- video_games_raw %>% mutate(release_date2 = mdy(release_date))
+vg %>% filter(game == "Hazard Ops") %>% mutate(release_date2 = dmy(release_date))
+
+
+vg %>% count(weekday = wday(release_date2, label = T)) %>% filter(!is.na(weekday)) %>% ggplot(aes(x=weekday, y = n)) + geom_line(group=1)
+
+vg %>% count(weekday = wday(release_date2, label = T)) %>% filter(!is.na(weekday)) %>% ggplot(aes(x=weekday, y = n)) + geom_line(group=1)
+
+
+vg %>% count(month = month(release_date2, label = T)) %>% filter(!is.na(month)) %>% ggplot(aes(x=month, y = n)) + geom_line(group=1)
+```
+
+does price affect sale
+
+```{r}
+vg %>% ggplot(aes(x=owners, y = price)) + geom_point()
+
+vg %>% ggplot(aes(x=owners, y = price)) + geom_boxplot() + coord_flip() + scale_y_log10()
+
+
+#odd since the way owmers is stored
+#edit to take min
+vg %>% separate(owners, c('min_owner', 'max_owner'), sep= "\\.")  
+
+
+
+vg %>% ggplot(aes(x=price, y = average_playtime)) + geom_point() + scale_x_log10() + scale_y_log10()
+```
+
+
