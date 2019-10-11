@@ -43,9 +43,48 @@ vg %>% ggplot(aes(x=owners, y = price)) + geom_boxplot() + coord_flip() + scale_
 #edit to take min
 vg %>% separate(owners, c('min_owner', 'max_owner'), sep= "\\.")  
 
+vg %>% str_split_fixed(owners, " .. ")
+
+pangram <- "The quick brown fox jumps over the lazy dog"
+
+strsplit(vg$owners, " ") 
+
+library(stringr)
+
+vg$owners1 <- word(vg$owners, 1)
 
 
+vg <- vg %>% mutate(max_owners = str_trim(word(owners, 2, sep = "\\.."))) %>% mutate(min_owners = str_trim(word(owners, 1, sep = "\\.."))) 
+
+              
+vg %>% mutate(min_owners = as.numeric(str_replace_all(min_owners, ",", "")))
+
+
+%>% View()
+
+vg %>% ggplot(aes(x=price, y = min_owners)) + geom_point() +  scale_y_log10()
+
+
+vg %>% ggplot(aes(x=owners, y = price)) + geom_boxplot() + coord_flip() + scale_y_log10()
+
+              
+              
 vg %>% ggplot(aes(x=price, y = average_playtime)) + geom_point() + scale_x_log10() + scale_y_log10()
 ```
+
+
+lets try again 
+```{r}
+
+vg1 <- vg %>% mutate(max_owners = str_trim(word(owners, 2, sep = "\\..")),
+         max_owners = as.numeric(str_replace_all(max_owners, ",", "")),
+         min_owners = str_trim(word(owners, 1, sep = "\\..")),
+         min_owners = as.numeric(str_replace_all(min_owners, ",", ""))) 
+
+
+vg1 %>% filter(min_owners > 0) %>% ggplot(aes(x=price, y = min_owners)) + geom_point() +  scale_x_log10()  + scale_y_log10()
+
+```
+
 
 

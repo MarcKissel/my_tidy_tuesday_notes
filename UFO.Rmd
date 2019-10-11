@@ -63,7 +63,11 @@ ufo %>% count(hour, sort=T)
 
 ufo  %>%   group_by(hour, country) %>% summarise(total_count = n()) %>% ggplot(aes(x=hour, y = total_count, group=country, color=country)) + geom_line(size=1)
 
-ufo  %>%   group_by(hour) %>% summarise(total_count = n()) %>% ggplot(aes(x=hour, y = total_count)) + geom_line(size=1)
+ufo  %>%   group_by(hour) %>% summarise(total_count = n()) %>% ggplot(aes(x=hour, y = total_count)) + geom_line(size=1) + labs(title = "the hour that a viewing occured")
+
+
+
+
 ```
 
 
@@ -97,7 +101,7 @@ library(tidytext)
 
 text_ufo <- ufo %>% select(date_time, description) %>% unnest_tokens(word,description ) %>% anti_join(stop_words) %>% filter(str_detect(word, "[a-z]")) 
 
-text_ufo %>% anti_join(stop_words) %>% count(word, sort=T)
+#text_ufo %>% anti_join(stop_words) %>% count(word, sort=T)
 
 text_ufo %>%  count(word, sort=T)  %>% head(30) %>%  mutate(word = fct_reorder(word, n)) %>% ggplot(aes(x=word, y=n)) + geom_col()+ coord_flip() + labs(title = "top 30 words used in descriptions of UFOs")
 
@@ -158,7 +162,7 @@ text_ufo %>%  count(word, sort=T)  %>% head(25) %>%  mutate(word = fct_reorder(w
                                  height = unit(1,"npc")), 
                       -Inf, Inf, -Inf, Inf) +
 
-  geom_col()+ coord_flip() + labs(title = "top 25 words used in descriptions of UFOs") + theme(legend.position = "none") 
+  geom_col()+ coord_flip() + labs(title = "top 25 words used in descriptions of UFO sightings", subtitle ="data from The National UFO Reporting Center", caption ="Stop words removed. Dataset from Tidytuesday", y = "Times a word appears in description of encounters") + theme(legend.position = "none") 
 
 
 
@@ -191,4 +195,16 @@ UFO_words_filtered %>% pairwise_cor(word, date_time, sort=TRUE)
 UFO_words_filtered %>%
   pairwise_cor(word, date_time, sort = TRUE)
 ```
+
+
+```{r}
+ufo %>% count(city_area, sort =T)
+
+ufo  %>% group_by(city_area) %>%  arrange(city_area)
+
+ufo %>% filter(!is.na(state))  %>% group_by(state) %>% head(25)  %>%  summarise(total_count = n()) %>% ggplot(aes(x=fct_reorder(state,total_count), y = total_count)) + geom_col() + coord_flip()
+
+```
+
+ufo  %>%   group_by(hour) %>% summarise(total_count = n()) %>% ggplot(aes(x=hour, y = total_count)) + geom_line(size=1) + labs(title = "the hour that a viewing occured")
 

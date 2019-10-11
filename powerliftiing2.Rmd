@@ -1,0 +1,94 @@
+---
+title: "Untitled"
+author: "Marc Kissel"
+date: "10/8/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(ggridges)
+ipf_lifts <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-08/ipf_lifts.csv")
+
+ipf_lifts
+
+```
+
+
+
+```{r}
+ipf_lifts %>% ggplot(aes(x=best3squat_kg, y =  sex, fill = sex)) + geom_density_ridges(alpha = .3)
+
+
+ipf_lifts %>% ggplot(aes(x=best3deadlift_kg, y =  sex, fill = sex)) + geom_density_ridges(aes(point_color=sex, point_fill = sex, point_shape = sex), alpha=.2, point_alpha = .05, jittered_points = TRUE  )
+  
+
+ipf_lifts %>% ggplot(aes(x=best3deadlift_kg, y =  sex)) + geom_density_ridges(aes(point_color=sex, point_fill = sex, point_shape = sex), alpha=.2, point_alpha = .05, jittered_points = TRUE  )
+
+
+ipf_lifts %>% ggplot(aes(x=best3deadlift_kg, y =  sex, fill = sex))  
+
+#####################3
+ipf_lifts %>% gather(key ="type", value = "measure", best3squat_kg:best3deadlift_kg) %>% ggplot(aes(y=type, x = measure, fill=sex)) + geom_density_ridges(alpha = .3) + labs(title = "Maximum of the first three successful attempts for the lift ", y ="", x = "kgs") + scale_y_discrete(labels = c("best3squat_kg" = "best 3 squats", "best3bench_kg" = "best 3 bench", "best3deadlift_kg" = "best 3 deadlift" ))
+
+
+############################3
+
+ipf_lifts %>% gather(key ="type", value = "measure", best3squat_kg:best3deadlift_kg) %>% ggplot(aes(y=type, x = measure, fill=sex)) + geom_density_ridges(alpha = .3) + labs(title = "hi", y ="", x = "kgs") + scale_x_discrete(labels = c(best 3 squats", "best3bench_kg" = "best 3 bench", "best3deadlift_kg" = "best 3 deadlift" ))
+
+
+
+
+
+ipf_lifts %>% ggplot(aes(x=best3deadlift_kg, y =  sex)) + geom_density_ridges()
+
+  
+
+```
+
+
+
+```{r}
+ipf_lifts %>% group_by(date, sex)
+
+ipf_lifts %>% mutate(year = year(date)) %>% group_by(year) %>% ggplot(aes(x = sex, y = best3bench_kg)) + geom_boxplot() + facet_wrap(~year)
+
+
+ipf_lifts %>% mutate(year = year(date)) %>% group_by(year) %>%  filter(year > 2005) %>% ggplot(aes(x = sex, y = best3bench_kg)) + geom_boxplot() + facet_wrap(~year)
+
+
+#animate
+library(gganimate)
+
+ipf_lifts %>% mutate(year = year(date)) %>% group_by(year) %>%  filter(year > 2005) %>% ggplot(aes(x = sex, y = best3bench_kg)) + geom_boxplot() +  transition_time(year) + labs(title = "Year: {frame_time}")
+
+
+ipf_lifts %>% mutate(year = year(date)) %>% group_by(year) %>%  filter(year > 2005) %>% ggplot(aes(x = sex, y = best3bench_kg, fill = sex)) + geom_boxplot() +  transition_time(year) + labs(title = "Year: {frame_time}")
+
+
+ipf_lifts %>% mutate(year = year(date)) %>% group_by(year) %>%  filter(year > 2005) %>% ggplot(aes(x = sex, y = best3bench_kg, fill = sex)) + geom_boxplot() +  transition_time(year) + labs(title = "Year: {frame_time}") + enter_fade() + 
+  exit_shrink() 
+
+
+
+#####
+
+ipf_lifts %>% gather(key ="type", value = "measure", best3squat_kg:best3deadlift_kg) %>% ggplot(aes(x=type, y = measure, fill=sex)) + geom_boxplot()
+
+
+ipf_lifts %>%  mutate(year = year(date)) %>% group_by(year) %>%  filter(year > 2009) %>%
+  
+  gather(key ="type", value = "measure", best3squat_kg:best3deadlift_kg) %>% ggplot(aes(x=type, y = measure, fill=sex)) + geom_boxplot() + transition_time(year) + labs(title = "Year: {frame_time}")
+
+
+
+ipf_lifts %>%  mutate(year = year(date)) %>% group_by(year) %>%  filter(year > 1980) %>%
+  gather(key ="type", value = "measure", best3squat_kg:best3deadlift_kg) %>% ggplot(aes(x=type, y = measure, fill=sex)) + geom_boxplot() + transition_time(year) + labs(title = "Year: {round(frame_time)}", y = "kg", x = "", subtitle = "Maximum of the first three successful attempts for the lift from IPF events since 1980", caption = "data from Tidytuesday dataset: https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-10-08" ) + scale_x_discrete(labels = c("best3squat_kg" = "Squats", "best3bench_kg" = "Bench", "best3deadlift_kg" = "Deadlift" ))
+
+```
+

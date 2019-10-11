@@ -1,0 +1,29 @@
+---
+title: "Untitled"
+author: "Marc Kissel"
+date: "9/30/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+pizza_jared <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-01/pizza_jared.csv")
+pizza_barstool <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-01/pizza_barstool.csv")
+pizza_datafiniti <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-10-01/pizza_datafiniti.csv")
+```
+
+
+can we map these data
+
+```{r}
+pizza_datafiniti %>% ggplot(aes(latitude, longitude)) + geom_point() + borders("state") + coord_map()
+
+
+library(leaflet)
+leaflet() %>% addCircleMarkers(data = pizza_datafiniti)
+```
+

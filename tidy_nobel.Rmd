@@ -98,7 +98,15 @@ nobel_winner_all_pubs %>% filter(laureate_id == 20001) %>% mutate(size = str_len
 nobel_winner_all_pubs  %>% mutate(size = str_length(title)) %>% View()
 
 nobel_winner_all_pubs  %>% mutate(size = str_length(title)) %>% ggplot(aes( x = is_prize_winning_paper, y= size)) + geom_boxplot() + coord_flip() + labs(x = "did paper win prize", y = "", title = "length of a paper and if it won Nobel compared to other paper by winning authors")
-  
+
+
+
+nobel_winner_all_pubs  %>% mutate(size = str_length(title)) %>% ggplot(aes( x = is_prize_winning_paper, y= size, fill= is_prize_winning_paper )) + geom_boxplot() + coord_flip() + labs(x = "did paper win prize", y = "", title = "length of a winning paper  compared to other papers by winning authors") + facet_wrap(~category) + theme(legend.position = "none")
+
+nobel_winner_all_pubs  %>% mutate(size = str_length(title)) %>% group_by(category) %>% summarise(mean(size, na.rm=TRUE))
+
+
+nobel_winner_all_pubs  %>% mutate(size = str_length(title)) %>% group_by(category) %>% mutate(mean_length = mean(size, na.rm=TRUE)) %>% ggplot(aes(x=category, y= mean_length)) + geom_histogram(stat = "identity")
 
 #how many pps do winning folks tend to write?
 
